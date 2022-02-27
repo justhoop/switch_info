@@ -50,4 +50,4 @@ if testping(host):
     else:
         print(f"{mac} not found")
 else:
-    print("host not respondig")
+    print("host not responding")

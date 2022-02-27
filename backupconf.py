@@ -15,17 +15,12 @@ def processcommand(cisco1, command):
     with ConnectHandler(**cisco1) as net_connect:
         output = net_connect.send_command(command)
 
-    print(output)
+    return output
 
-if len(argv) == 2:
-    host = argv[1]
+host = input('host: ')
+user = input('user: ')
+if not user:
     user = getuser()
-elif len(argv) == 3:
-    host = argv[1]
-    user = argv[2]
-else:
-    host = input('host: ')
-    user = input('user: ')
 
 if testping(host):
     print(user)
@@ -35,7 +30,9 @@ if testping(host):
         "username": user,
         "password": getpass(),
     }
-    processcommand(cisco1, "show conf")
-    processcommand(cisco1, "show version")
+    hostname = (processcommand(cisco1, "show running-config | include hostname")).split(' ')[1] + '.txt'
+    config = processcommand(cisco1, "show running-config")
+    with open(hostname, 'w') as f:
+        f.write(config)
 else:
     print("host not responding")

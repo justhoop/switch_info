@@ -26,6 +26,8 @@ elif len(argv) == 3:
 else:
     host = input('host: ')
     user = input('user: ')
+if not user:
+    user = getuser()
 
 if testping(host):
     print(user)
@@ -35,7 +37,7 @@ if testping(host):
         "username": user,
         "password": getpass(),
     }
-    processcommand(cisco1, "show conf")
+    # processcommand(cisco1, "show conf")
     processcommand(cisco1, "show version")
 else:
     print("host not responding")

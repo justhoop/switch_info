@@ -16,6 +16,19 @@ def processcommand(cisco1, command):
         output = net_connect.send_command(command)
     return output
 
+def unusedports(ports):
+	interfaces = "Name,LastInput,LastOutPut\n"
+	for line in ports:
+		if line[0] != ' ' and 'Vlan' not in line and 'is down' in line:
+			interface = line.split(" ")[0]
+		elif 'Last input' in line:
+			if 'interface' in locals():
+				interface += ',' + line.split(",")[0].strip().split(" ")[-1]
+				interface += ',' + line.split(",")[1].strip().split(" ")[-1] + "\n"
+				interfaces += interface
+				del interface
+	return interfaces
+
 def getunusedports(host):
 	user = getenv('SWITCH_USER','none')
 	password = getenv('SWITCH_PW','none')
@@ -30,15 +43,14 @@ def getunusedports(host):
 			"password": password,
 		}
 		hostname = (processcommand(
-			cisco1, "show running-config | include hostname")).split(' ')[1] + '.txt'
+			cisco1, "show running-config | include hostname")).split(' ')[1] + '.csv'
 		print(f"Processing {hostname}")
-		unusedPorts = processcommand(
-			cisco1, "show interfaces | include proto.*notconnect|proto.*administratively down|Last in.*[1-9][4-9]w[0-9]|[0-9]y|disabled|Last input never, output never, output hang never")
-		# may want to convert to list in order to process names into a more readable form
-		# unusedPorts = unusedPorts.split("\n")
-
+		# unusedPorts = processcommand(
+			# cisco1, "show interfaces | include proto.*notconnect|proto.*administratively down|Last in.*[1-9][4-9]w[0-9]|[0-9]y|disabled|Last input never, output never, output hang never")
+		ports = processcommand(cisco1, "show interfaces")
+		unused = getunusedports(ports)
 		with open(hostname, 'w') as f:
-			f.write(unusedPorts)
+			f.write(unused)
 	else:
 		print(f"{host} is not reachable")
 
